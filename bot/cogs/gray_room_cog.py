@@ -6,13 +6,13 @@ from discord.ext.commands import Cog, command
 from dotenv import load_dotenv
 
 from bot import utils, constants
-from bot.konrad import Konrad
+#from bot.konrad import Konrad
 
 load_dotenv()
 
 
 class GrayRoomCog(Cog):
-    def __init__(self, bot: Konrad):
+    def __init__(self, bot):
         self.bot = bot
 
     @command(name='gr', description='Schickt Altklausuren vom ausgewählten Modul')

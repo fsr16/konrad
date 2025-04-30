@@ -3,11 +3,11 @@ from discord import app_commands
 from discord.ext.commands import Cog, command
 
 from bot import utils
-from bot.konrad import Konrad
+#from bot.konrad import Konrad
 
 
 class LatexCommand(Cog):
-    def __init__(self, bot: Konrad):
+    def __init__(self, bot):
         self.bot = bot
 
     @command(name='latex', description='Gibt den angegeben Ausdruck als LaTeX-Ausdruck wieder')
