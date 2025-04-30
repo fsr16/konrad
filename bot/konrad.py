@@ -19,6 +19,7 @@ class Konrad(Bot):
     async def setup_hook(self):
         for module in bot_modules:
             await self.add_cog(module(self))
+        print("Cogs loaded")
 
     async def on_ready(self):
         print(f"Bot is online as '{self.user}'")

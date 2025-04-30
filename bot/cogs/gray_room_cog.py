@@ -2,11 +2,11 @@ import os
 
 import discord
 from discord import app_commands
-from discord.ext.commands import Cog, command
+from discord.ext import commands
+from discord.ext.commands import Cog, hybrid_command
 from dotenv import load_dotenv
 
 from bot import utils, constants
-#from bot.konrad import Konrad
 
 load_dotenv()
 
@@ -15,9 +15,9 @@ class GrayRoomCog(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name='gr', description='Schickt Altklausuren vom ausgewählten Modul')
+    @hybrid_command(name='gr', description='Schickt Altklausuren vom ausgewählten Modul')
     @app_commands.describe(modul='Abkürzung des Moduls')
-    async def gr(self, interaction, modul: str):
+    async def gr(self, ctx: commands.Context[commands.Bot], modul: str):
         cursor = utils.connect_db()
         modules_lower = utils.get_modules_lower(cursor)
 
@@ -28,13 +28,13 @@ class GrayRoomCog(Cog):
                 sent.colour = discord.Colour.green()
                 sent.title = f'Altklausren {utils.get_modul_name(cursor, modul.lower())}'
                 sent.description = f'Bitte beachte, dass die Nachricht in {os.getenv('GR_DEL_MIN')} Minuten gelöscht wird'
-                await interaction.response.send_message(embed=sent, file=discord.File(fp=path), ephemeral=True, delete_after=constants.GR_DEL_SEC)
+                await ctx.send(embed=sent, file=discord.File(fp=path), ephemeral=True, delete_after=constants.GR_DEL_SEC)
             except FileNotFoundError as e:
                 no_file = discord.Embed()
                 no_file.colour = discord.Colour.red()
                 no_file.title = 'Keine Altklausuren zu dem Modul gefunden'
                 no_file.description = f'Das ist nicht dein Fehler. Das Team wurde bereits benachrichtigt.'
-                await interaction.response.send_message(embed=no_file, ephemeral=True, delete_after=constants.GR_DEL_SEC)
+                await ctx.send(embed=no_file, ephemeral=True, delete_after=constants.GR_DEL_SEC)
                 no_file_log = discord.Embed()
                 no_file_log.colour = discord.Colour.red()
                 no_file_log.title = f'Keine Altklausuren zu dem Modul {utils.get_modul_name(cursor, modul.lower())} gefunden'
@@ -56,12 +56,12 @@ class GrayRoomCog(Cog):
                 f'Eine Liste aller verfügbaren Module findest du in <#{os.getenv('GR_ANLEITUNG_CHANNEL_ID')}>.\n'
                 f'Bitte überprüfe auch, ob du den Modulnamen richtig gescrieben hast.'
             )
-            await interaction.response.send_message(embed=no_modul, ephemeral=True, delete_after=constants.GR_DEL_SEC)
+            await ctx.send(embed=no_modul, ephemeral=True, delete_after=constants.GR_DEL_SEC)
 
         utils.close_db(cursor)
 
-    @command(name='anleitung', description='Schickt die Anleitung für den Grauen Raum in den Anleitungschannel')
-    async def anleitung(self, interaction):
+    @hybrid_command(name='anleitung', description='Schickt die Anleitung für den Grauen Raum in den Anleitungschannel')
+    async def anleitung(self, ctx: commands.Context[commands.Bot]):
         anleitung_channel = self.bot.get_channel(int(os.getenv('GR_ANLEITUNG_CHANNEL_ID')))
         await anleitung_channel.send(
             '# Wichtige Infos zum Grauen Raum\n'
@@ -88,10 +88,10 @@ class GrayRoomCog(Cog):
             f'Gegen einen geringen Beitrag könnt ihr das bei uns in der Fachschaft machen. Während der Vorlesungszeit könnt ihr {os.getenv('GR_ZEITEN')} '
             f'vorbeikommen oder schreibt an `grauerraum-fsr16@uni-kassel.de`, um einen Termin zu vereinbaren. Eine Terminvereinbarung ist auch außerhalb der Vorlesungszeit möglich.'
         )
-        await interaction.response.send_message('Anleitung gesendet')
+        await ctx.send('Anleitung gesendet')
 
-    @command(name='module', description='Sendet alle verfügbaren Module in den Anleitungschannel')
-    async def module(self, interaction):
+    @hybrid_command(name='module', description='Sendet alle verfügbaren Module in den Anleitungschannel')
+    async def module(self, ctx: commands.Context[commands.Bot]):
         inf = utils.create_available_modules('inf')
         etech = utils.create_available_modules('etech')
         sonst = utils.create_available_modules('sonst')
@@ -101,4 +101,4 @@ class GrayRoomCog(Cog):
         await anleitung_channel.send(embed=etech)
         await anleitung_channel.send(embed=sonst)
 
-        await interaction.response.send_message('Verfügbare Module gesendet')
+        await ctx.send('Verfügbare Module gesendet')

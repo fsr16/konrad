@@ -6,8 +6,6 @@ from discord import Message
 from discord.ext.commands import Cog
 from dotenv import load_dotenv
 
-#from bot.konrad import Konrad
-
 load_dotenv()
 
 
